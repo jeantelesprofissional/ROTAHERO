@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>RotaHero — Menu Lateral</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+            min-height: 100vh;
+            color: #eef4ff;
+            overflow-x: hidden;
+        }
+
+        /* Menu lateral */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+            display: none;
+        }
+        .menu-overlay.active {
+            display: block;
+        }
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, #0e171f 0%, #07121a 100%);
+            z-index: 999;
+            transition: left 0.3s ease;
+            padding: 24px 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+            border-right: 1px solid #f4a26140;
+            overflow-y: auto;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .menu-header {
+            text-align: center;
+            padding: 0 16px 20px 16px;
+            border-bottom: 1px solid #f4a26140;
+            margin-bottom: 20px;
+        }
+        .menu-header h2 {
+            color: #ffd966;
+            margin-bottom: 6px;
+        }
+        .menu-header p {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            margin: 4px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #eef4ff;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: #f4a26120;
+            border-left: 3px solid #f4a261;
+        }
+        .menu-item span:first-child {
+            font-size: 22px;
+        }
+
+        /* Botão hambúrguer */
+        .hamburger {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            width: 48px;
+            height: 48px;
+            background: #0e171f;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 997;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            border: 1px solid #f4a26160;
+        }
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background: #f4a261;
+            border-radius: 2px;
+        }
+
+        /* Conteúdo principal */
+        .main-content {
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 80px 16px 100px 16px;
+        }
+
+        /* Telas (sections) */
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(18, 28, 36, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        /* Seletor de data */
+        .date-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .date-nav-btn {
+            background: #2c404b;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .current-date {
+            font-size: 14px;
+            font-weight: bold;
+            background: #0e171f;
+            padding: 10px 16px;
+            border-radius: 40px;
+            text-align: center;
+            flex: 1;
+        }
+        .today-badge {
+            background: #f4a261;
+            color: #1e2a32;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stat-box {
+            background: #0e171f;
+            padding: 10px 12px;
+            border-radius: 40px;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffd966;
+        }
+        .stat-label {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .stat-card {
+            background: #0e171f;
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 26px;
+            font-weight: bold;
+            color: #f4a261;
+        }
+
+        .financial-card {
+            background: linear-gradient(135deg, #1f4e3c, #0e2b20);
+            border-radius: 28px;
+            padding: 16px;
+            text-align: center;
+        }
+        .progress-bar {
+            background: #2a3b44;
+            border-radius: 30px;
+            height: 16px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .mission-item {
+            background: #16232e;
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f4a261;
+        }
+        .mission-completed {
+            opacity: 0.6;
+            border-left-color: #2ecc71;
+        }
+        .mission-failed {
+            border-left-color: #c0392b;
+            background: #16232e80;
+        }
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .mission-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .mission-status {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .status-done { background: #2ecc71; color: #1e2a32; }
+        .status-pending { background: #f4a261; color: #1e2a32; }
+        .status-failed { background: #c0392b; color: white; }
+        .mission-rewards {
+            font-size: 12px;
+            margin: 8px 0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .mission-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-complete {
+            background: #2ecc71;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+        .btn-edit {
+            background: #3498db;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            color: white;
+        }
+        .btn-delete {
+            background: #c0392b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            color: white;
+        }
+        .btn-primary {
+            background: #f4a261;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #1e2a32;
+            cursor: pointer;
+            width: 100%;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+        input, select {
+            background: #1e2f3a;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            color: white;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .badge {
+            background: #2d3f44;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+        .badge.locked {
+            opacity: 0.4;
+            filter: grayscale(0.6);
+        }
+
+        .footer-credit {
+            text-align: center;
+            padding: 16px;
+            font-size: 10px;
+            opacity: 0.4;
+            color: #8aaec0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: #1e2e34;
+            backdrop-filter: blur(12px);
+            text-align: center;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu lateral -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <h2>⚔️ RotaHero</h2>
+            <p>Sua jornada de produtividade</p>
+        </div>
+        <div class="menu-item" data-screen="home">
+            <span>📅</span> <span>Hoje</span>
+        </div>
+        <div class="menu-item" data-screen="history">
+            <span>📜</span> <span>Histórico</span>
+        </div>
+        <div class="menu-item" data-screen="stats">
+            <span>📊</span> <span>Estatísticas</span>
+        </div>
+        <div class="menu-item" data-screen="missions">
+            <span>📋</span> <span>Minhas Missões</span>
+        </div>
+        <div class="menu-item" data-screen="add">
+            <span>➕</span> <span>Criar Missão</span>
+        </div>
+        <div class="menu-item" data-screen="settings">
+            <span>⚙️</span> <span>Configurações</span>
+        </div>
+        <div class="menu-item" data-screen="manual">
+            <span>📖</span> <span>Manual</span>
+        </div>
+    </div>
+
+    <div class="hamburger" id="hamburgerBtn">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="main-content">
+        <!-- Tela Hoje -->
+        <div id="screen-home" class="screen active">
+            <div class="financial-card">
+                <div style="font-size: 14px;">💰 META FINANCEIRA</div>
+                <div style="font-size: 24px; font-weight: bold;" id="goalAmountDisplay">R$ 0</div>
+                <div id="releasedAmountDisplay">Liberado: R$ 0</div>
+                <div class="progress-bar"><div class="progress-fill" id="financialProgressFill"></div></div>
+                <div id="goalPercentDisplay">0%</div>
+            </div>
+
+            <div class="card">
+                <div class="date-selector">
+                    <button class="date-nav-btn" id="prevDayBtn">◀</button>
+                    <div class="current-date" id="currentDateDisplay"></div>
+                    <button class="date-nav-btn" id="nextDayBtn">▶</button>
+                </div>
+                <div id="dailyMissionsList"></div>
+            </div>
+
+            <div class="card">
+                <div class="hero-stats">
+                    <div class="stat-box"><span class="stat-value" id="levelValue">1</span><div class="stat-label">Nível</div></div>
+                    <div class="stat-box"><span class="stat-value" id="streakCount">0</span><div class="stat-label">🔥 Ofensiva</div></div>
+                    <div class="stat-box"><span class="stat-value" id="coinCount">0</span><div class="stat-label">🪙 Moedas</div></div>
+                    <div class="stat-box"><span class="stat-value" id="completionRate">0</span><div class="stat-label">% Acerto</div></div>
+                </div>
+                <div style="background:#2a3b44; border-radius:30px; height:10px; margin-top:10px;">
+                    <div class="progress-fill" id="xpFill" style="width:0%; height:100%; background:linear-gradient(90deg,#ffb347,#ff8c1a);"></div>
+                </div>
+                <div id="xpText" style="font-size:12px; margin-top:6px;">0 / 100 XP</div>
+            </div>
+        </div>
+
+        <!-- Tela Histórico -->
+        <div id="screen-history" class="screen">
+            <div class="card">
+                <h3>📜 Histórico de Missões</h3>
+                <div class="date-selector" style="margin-top: 12px;">
+                    <button class="date-nav-btn" id="historyPrevBtn">◀</button>
+                    <div class="current-date" id="historyDateDisplay"></div>
+                    <button class="date-nav-btn" id="historyNextBtn">▶</button>
+                </div>
+                <div id="historyMissionsList" style="margin-top: 16px;"></div>
+            </div>
+        </div>
+
+        <!-- Tela Estatísticas -->
+        <div id="screen-stats" class="screen">
+            <div class="card">
+                <h3>📊 Estatísticas de Desempenho</h3>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="number" id="totalMissionsStat">0</div><div class="stat-label">Total</div></div>
+                    <div class="stat-card"><div class="number" id="completedMissionsStat">0</div><div class="stat-label">Concluídas</div></div>
+                    <div class="stat-card"><div class="number" id="failedMissionsStat">0</div><div class="stat-label">Não cumpridas</div></div>
+                    <div class="stat-card"><div class="number" id="completionRateStat">0%</div><div class="stat-label">Taxa de acerto</div></div>
+                    <div class="stat-card"><div class="number" id="totalXPStat">0</div><div class="stat-label">XP total</div></div>
+                    <div class="stat-card"><div class="number" id="totalMoneyStat">R$ 0</div><div class="stat-label">Total liberado</div></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🏆 Conquistas</h3>
+                <div id="badgesList" class="badge-list"></div>
+            </div>
+        </div>
+
+        <!-- Tela Minhas Missões -->
+        <div id="screen-missions" class="screen">
+            <div class="card">
+                <h3>📋 Todas as Missões</h3>
+                <div id="allMissionsList"></div>
+            </div>
+        </div>
+
+        <!-- Tela Criar Missão -->
+        <div id="screen-add" class="screen">
+            <div class="card">
+                <h3>✨ Criar Nova Missão</h3>
+                <div class="form-group"><label>Nome</label><input type="text" id="missionName" placeholder="Ex: Estudar 1 hora"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>🏅 XP</label><input type="number" id="missionXP" value="20"></div>
+                    <div class="form-group"><label>💰 Valor (R$)</label><input type="number" id="missionMoney" value="10" step="5"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>📌 Categoria</label>
+                        <select id="missionCategory"><option value="saude">💪 Saúde</option><option value="estudos">📚 Estudos</option><option value="trabalho">💼 Trabalho</option><option value="lazer">🎮 Lazer</option><option value="financeiro">💰 Financeiro</option></select>
+                    </div>
+                    <div class="form-group"><label>⚡ Dificuldade</label>
+                        <select id="missionDifficulty"><option value="easy">🌱 Fácil</option><option value="medium">🌟 Médio</option><option value="hard">⚡ Difícil</option></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>🔄 Recorrência</label>
+                        <select id="missionRecurrence"><option value="daily">📅 Diária</option><option value="weekly">📆 Semanal</option><option value="monthly">🗓️ Mensal</option><option value="once">🎯 Única</option></select>
+                    </div>
+                    <div class="form-group"><label>📅 Data</label><input type="date" id="missionDueDate"></div>
+                </div>
+                <button id="createMissionBtn" class="btn-primary">➕ Criar Missão</button>
+            </div>
+        </div>
+
+        <!-- Tela Configurações -->
+        <div id="screen-settings" class="screen">
+            <div class="card"><h3>💰 Meta Financeira</h3><input type="number" id="goalValueInput" placeholder="Valor da meta (R$)"><button id="saveGoalBtn" class="btn-primary" style="margin-top:10px;">Salvar Meta</button></div>
+            <div class="card"><h3>⚠️ Dados</h3><button id="resetAllDataBtn" class="btn-primary" style="background:#c0392b;">Resetar Todos os Dados</button></div>
+        </div>
+
+        <!-- Tela Manual -->
+        <div id="screen-manual" class="screen">
+            <div class="card">
+                <h2>📖 Manual do RotaHero</h2>
+                <h3 style="margin-top: 16px;">🎯 Apresentação</h3>
+                <p>O <strong>RotaHero</strong> é um aplicativo de gamificação de rotina projetado especialmente para ajudar pessoas com <strong>TDAH</strong> a organizar tarefas, manter consistência e alcançar metas financeiras e pessoais.</p>
+                
+                <h3>⚙️ Como Funciona</h3>
+                <p>• Crie <strong>missões</strong> com nome, XP, valor em R$, categoria e dificuldade.<br>
+                • Defina <strong>recorrência</strong> (diária, semanal, mensal ou única) e data de vencimento.<br>
+                • Complete missões para ganhar <strong>XP, moedas e liberar dinheiro</strong> da sua meta financeira.<br>
+                • Mantenha a <strong>ofensiva (streak)</strong> para ganhar bônus.<br>
+                • Acompanhe seu <strong>histórico</strong> (o que fez e o que deixou de fazer).<br>
+                • Visualize <strong>estatísticas</strong> detalhadas e desbloqueie <strong>conquistas</strong>.</p>
+                
+                <h3>🧠 Benefícios para TDAH</h3>
+                <p><strong>Organização visual:</strong> Missões claras reduzem sobrecarga mental.<br>
+                <strong>Recompensas imediatas:</strong> Estimulam a dopamina.<br>
+                <strong>Quebra de tarefas grandes:</strong> Evita paralisia.<br>
+                <strong>Histórico sem culpa:</strong> Apenas dados, sem julgamento.<br>
+                <strong>Rotina previsível:</strong> Recorrência cria hábitos.</p>
+                
+                <h3>💰 Objetivo Financeiro</h3>
+                <p>Defina uma <strong>meta em dinheiro real</strong>. Cada missão concluída libera um valor. Ao atingir 100%, você "libera" o dinheiro para um objetivo real (viagem, presente, investimento).</p>
+                
+                <h3>📱 Dicas de Uso</h3>
+                <p>1. Comece com 3-5 missões diárias.<br>2. Use o <strong>Histórico</strong> para refletir semanalmente.<br>3. Ajuste recompensas se achar uma tarefa muito difícil/fácil.<br>4. Mantenha a ofensiva: completar algo todos os dias evita o efeito "tudo ou nada".</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-credit">
+        ⚔️ App criado por Jean Teles | RotaHero
+    </div>
+
+    <div id="toastMessage" class="toast" style="opacity:0;"></div>
+
+    <script>
+        // ==================== DADOS ====================
+        let player = {
+            level: 1, currentXP: 0, totalXPRequired: 100, coins: 0, streak: 0,
+            lastCompletionDate: null, totalXPEarned: 0, totalMissionsCompleted: 0,
+            financialGoal: 500, financialReleased: 0,
+            badgesUnlocked: { firstBlood: false, xp200: false, streak3: false, streak7: false, missions5: false, financialHero: false }
+        };
+        let missions = [];
+        let historicalRecords = [];
+        let nextId = 1;
+        let currentViewDate = new Date();
+        let historyViewDate = new Date();
+
+        function loadData() {
+            const saved = localStorage.getItem("rotaHeroV6");
+            if(saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    player = data.player;
+                    missions = data.missions || [];
+                    historicalRecords = data.historicalRecords || [];
+                    nextId = data.nextId || 1;
+                } catch(e) { initDefault(); }
+            } else { initDefault(); }
+            checkAndRegisterFailedMissions();
+            renderAll();
+        }
+
+        function initDefault() {
+            const today = new Date().toISOString().slice(0,10);
+            missions = [
+                { id: nextId++, name: "Beber 2L água", xp: 10, money: 5, category: "saude", difficulty: "easy", recurrence: "daily", dueDate: today, completed: false, completedAt: null, lastReset: today },
+                { id: nextId++, name: "Estudar 30min", xp: 30, money: 15, category: "estudos", difficulty: "medium", recurrence: "daily", dueDate: today, completed: false, completedAt: null, lastReset: today }
+            ];
+            historicalRecords = [];
+            saveGame();
+        }
+
+        function saveGame() { localStorage.setItem("rotaHeroV6", JSON.stringify({ player, missions, historicalRecords, nextId })); }
+
+        function checkAndRegisterFailedMissions() {
+            const today = new Date().toISOString().slice(0,10);
+            missions.forEach(mission => {
+                if(mission.completed) return;
+                if(mission.dueDate < today) {
+                    const alreadyRecorded = historicalRecords.some(r => r.missionId === mission.id && r.date === mission.dueDate);
+                    if(!alreadyRecorded) {
+                        historicalRecords.push({ missionId: mission.id, missionName: mission.name, date: mission.dueDate, status: "failed", xpLost: mission.xp, moneyLost: mission.money });
+                    }
+                }
+            });
+            saveGame();
+        }
+
+        function checkAndResetRecurringMissions() {
+            const today = new Date().toISOString().slice(0,10);
+            let updated = false;
+            missions.forEach(mission => {
+                if(mission.completed && mission.recurrence !== "once") {
+                    let shouldReset = false;
+                    if(mission.recurrence === "daily" && mission.lastReset !== today) shouldReset = true;
+                    else if(mission.recurrence === "weekly") {
+                        const lastReset = new Date(mission.lastReset);
+                        const now = new Date(today);
+                        if(Math.floor((now - lastReset) / (1000*60*60*24)) >= 7) shouldReset = true;
+                    } else if(mission.recurrence === "monthly") {
+                        const lastReset = new Date(mission.lastReset);
+                        const now = new Date(today);
+                        if(now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()) shouldReset = true;
+                    }
+                    if(shouldReset) {
+                        mission.completed = false; mission.completedAt = null; mission.lastReset = today;
+                        const date = new Date(today);
+                        if(mission.recurrence === "daily") date.setDate(date.getDate() + 1);
+                        else if(mission.recurrence === "weekly") date.setDate(date.getDate() + 7);
+                        else if(mission.recurrence === "monthly") date.setMonth(date.getMonth() + 1);
+                        mission.dueDate = date.toISOString().slice(0,10);
+                        updated = true;
+                    }
+                }
+            });
+            if(updated) { saveGame(); renderAll(); }
+        }
+
+        function addXP(amount) {
+            player.currentXP += amount; player.totalXPEarned += amount;
+            while(player.currentXP >= player.totalXPRequired) {
+                player.currentXP -= player.totalXPRequired;
+                player.level++;
+                player.totalXPRequired = Math.floor(100 + (player.level-1) * 25);
+                showToast(`🎉 NÍVEL ${player.level}!`);
+            }
+            saveGame(); renderAll(); checkBadges();
+        }
+
+        function addCoins(amount) { player.coins += amount; saveGame(); renderAll(); }
+
+        function releaseMoney(amount) {
+            let releaseAmount = Math.min(amount, player.financialGoal - player.financialReleased);
+            player.financialReleased += releaseAmount;
+            saveGame(); renderAll();
+            if(player.financialReleased >= player.financialGoal && !player.badgesUnlocked.financialHero) {
+                player.badgesUnlocked.financialHero = true;
+                addCoins(200);
+                showToast("🏆 Herói Financeiro! +200 moedas");
+            }
+            return releaseAmount;
+        }
+
+        function updateStreak() {
+            const today = new Date().toISOString().slice(0,10);
+            if(!player.lastCompletionDate) { player.streak = 1; player.lastCompletionDate = today; }
+            else {
+                const lastDate = new Date(player.lastCompletionDate);
+                const currentDate = new Date(today);
+                const diffDays = Math.floor((currentDate - lastDate) / (1000*60*60*24));
+                if(diffDays === 1) { player.streak++; player.lastCompletionDate = today; }
+                else if(diffDays > 1) { player.streak = 1; player.lastCompletionDate = today; }
+            }
+            saveGame(); checkBadges();
+        }
+
+        function completeMission(missionId) {
+            const mission = missions.find(m => m.id === missionId);
+            if(!mission || mission.completed) return;
+            const today = new Date().toISOString().slice(0,10);
+            if(mission.dueDate < today && mission.recurrence === "once") { showToast("⚠️ Missão expirou!"); return; }
+            mission.completed = true;
+            mission.completedAt = new Date().toISOString();
+            addXP(mission.xp);
+            addCoins(Math.floor(mission.money / 2) + 2);
+            releaseMoney(mission.money);
+            player.totalMissionsCompleted++;
+            updateStreak();
+            checkBadges();
+            historicalRecords = historicalRecords.filter(r => !(r.missionId === missionId && r.date === mission.dueDate));
+            showToast(`✅ "${mission.name}" | +${mission.xp} XP`);
+            renderAll();
+        }
+
+        function deleteMission(missionId) {
+            if(confirm("Remover esta missão?")) {
+                missions = missions.filter(m => m.id !== missionId);
+                historicalRecords = historicalRecords.filter(r => r.missionId !== missionId);
+                saveGame(); renderAll(); showToast("Missão removida");
+            }
+        }
+
+        function editMission(missionId) {
+            const mission = missions.find(m => m.id === missionId);
+            if(!mission) return;
+            const newName = prompt("Novo nome:", mission.name);
+            if(newName && newName.trim()) mission.name = newName.trim();
+            const newXP = prompt("Novo XP:", mission.xp);
+            if(newXP && !isNaN(newXP)) mission.xp = parseInt(newXP);
+            const newMoney = prompt("Novo valor (R$):", mission.money);
+            if(newMoney && !isNaN(newMoney)) mission.money = parseInt(newMoney);
+            saveGame(); renderAll(); showToast("Missão atualizada!");
+        }
+
+        function createMission() {
+            const name = document.getElementById("missionName").value.trim();
+            if(!name) return showToast("Digite o nome!");
+            const xp = parseInt(document.getElementById("missionXP").value) || 10;
+            const money = parseInt(document.getElementById("missionMoney").value) || 5;
+            const category = document.getElementById("missionCategory").value;
+            const difficulty = document.getElementById("missionDifficulty").value;
+            const recurrence = document.getElementById("missionRecurrence").value;
+            let dueDate = document.getElementById("missionDueDate").value;
+            if(!dueDate) dueDate = new Date().toISOString().slice(0,10);
+            missions.push({ id: nextId++, name, xp, money, category, difficulty, recurrence, dueDate, completed: false, completedAt: null, lastReset: new Date().toISOString().slice(0,10) });
+            document.getElementById("missionName").value = "";
+            document.getElementById("missionDueDate").value = "";
+            saveGame(); renderAll(); showToast(`✨ "${name}" criada!`);
+        }
+
+        function renderAll() {
+            checkAndRegisterFailedMissions();
+            checkAndResetRecurringMissions();
+            renderFinancial(); renderStats(); renderDailyMissions(); renderHistoryMissions(); renderAllMissions(); renderBadges(); renderStatisticsPage();
+        }
+
+        function renderFinancial() {
+            const percent = (player.financialReleased / player.financialGoal) * 100;
+            document.getElementById("goalAmountDisplay").innerHTML = `R$ ${player.financialGoal.toFixed(2)}`;
+            document.getElementById("releasedAmountDisplay").innerHTML = `Liberado: R$ ${player.financialReleased.toFixed(2)}`;
+            document.getElementById("financialProgressFill").style.width = `${Math.min(100, percent)}%`;
+            document.getElementById("goalPercentDisplay").innerHTML = `${percent.toFixed(1)}%`;
+        }
+
+        function renderStats() {
+            const xpPercent = (player.currentXP / player.totalXPRequired) * 100;
+            document.getElementById("xpFill").style.width = `${Math.min(100, xpPercent)}%`;
+            document.getElementById("xpText").innerHTML = `${player.currentXP}/${player.totalXPRequired} XP`;
+            document.getElementById("levelValue").innerText = player.level;
+            document.getElementById("streakCount").innerText = player.streak;
+            document.getElementById("coinCount").innerText = player.coins;
+            const total = player.totalMissionsCompleted + historicalRecords.length;
+            const rate = total > 0 ? Math.round((player.totalMissionsCompleted / total) * 100) : 0;
+            document.getElementById("completionRate").innerText = rate;
+        }
+
+        function renderDailyMissions() {
+            const dateStr = currentViewDate.toISOString().slice(0,10);
+            const isToday = dateStr === new Date().toISOString().slice(0,10);
+            
+            let displayText = currentViewDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            if(isToday) displayText += ' <span class="today-badge">HOJE</span>';
+            document.getElementById("currentDateDisplay").innerHTML = displayText;
+            
+            const dailyMissions = missions.filter(m => m.recurrence === "once" ? m.dueDate === dateStr : true);
+            const container = document.getElementById("dailyMissionsList");
+            
+            if(dailyMissions.length === 0) {
+                container.innerHTML = "<div class='empty-message'>✨ Nenhuma missão para este dia! ✨</div>";
+                return;
+            }
+            
+            container.innerHTML = dailyMissions.map(mission => {
+                const isCompleted = mission.completed && mission.completedAt && mission.completedAt.slice(0,10) === dateStr;
+                const hasFailed = historicalRecords.some(r => r.missionId === mission.id && r.date === dateStr);
+                let statusBadge = '';
+                if(isCompleted) statusBadge = '<span class="mission-status status-done">✅ Concluída</span>';
+                else if(hasFailed) statusBadge = '<span class="mission-status status-failed">❌ Não cumprida</span>';
+                else statusBadge = '<span class="mission-status status-pending">⏳ Pendente</span>';
+                return `<div class="mission-item ${isCompleted ? 'mission-completed' : (hasFailed ? 'mission-failed' : '')}">
+                    <div class="mission-header"><span class="mission-name">${escapeHtml(mission.name)}</span>${statusBadge}</div>
+                    <div class="mission-rewards"><span>🏅 ${mission.xp} XP</span><span>💰 R$ ${mission.money}</span></div>
+                    ${!isCompleted && !hasFailed ? `<div class="mission-actions"><button class="btn-complete" onclick="completeMission(${mission.id})">✔ Concluir</button><button class="btn-edit" onclick="editMission(${mission.id})">✏️</button><button class="btn-delete" onclick="deleteMission(${mission.id})">🗑️</button></div>` : ''}
+                </div>`;
+            }).join("");
+        }
+
+        function renderHistoryMissions() {
+            const dateStr = historyViewDate.toISOString().slice(0,10);
+            document.getElementById("historyDateDisplay").innerHTML = historyViewDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const completedOnDate = missions.filter(m => m.completed && m.completedAt && m.completedAt.slice(0,10) === dateStr);
+            const failedOnDate = historicalRecords.filter(r => r.date === dateStr);
+            const container = document.getElementById("historyMissionsList");
+            if(completedOnDate.length === 0 && failedOnDate.length === 0) { container.innerHTML = "<div class='empty-message'>📭 Nenhuma atividade registrada neste dia</div>"; return; }
+            let html = "";
+            if(completedOnDate.length > 0) { html += `<h4 style="margin:12px 0 8px;color:#2ecc71;">✅ Concluídas (${completedOnDate.length})</h4>`; completedOnDate.forEach(m => { html += `<div class="mission-item mission-completed"><div class="mission-header"><span class="mission-name">${escapeHtml(m.name)}</span><span class="mission-status status-done">Concluída</span></div><div class="mission-rewards"><span>🏅 +${m.xp} XP</span><span>💰 +R$ ${m.money}</span></div></div>`; }); }
+            if(failedOnDate.length > 0) { html += `<h4 style="margin:12px 0 8px;color:#c0392b;">❌ Não Cumpridas (${failedOnDate.length})</h4>`; failedOnDate.forEach(r => { html += `<div class="mission-item mission-failed"><div class="mission-header"><span class="mission-name">${escapeHtml(r.missionName)}</span><span class="mission-status status-failed">Não cumprida</span></div><div class="mission-rewards"><span>📉 Perdeu ${r.xpLost} XP</span></div></div>`; }); }
+            container.innerHTML = html;
+        }
+
+        function renderAllMissions() {
+            const container = document.getElementById("allMissionsList");
+            if(missions.length === 0) { container.innerHTML = "<div class='empty-message'>Nenhuma missão criada</div>"; return; }
+            container.innerHTML = missions.map(mission => `<div class="mission-item ${mission.completed ? 'mission-completed' : ''}"><div class="mission-header"><span class="mission-name">${escapeHtml(mission.name)}</span><span class="mission-badge">${mission.completed ? '✅ Feita' : '⏳ Pendente'}</span></div><div class="mission-rewards"><span>🏅 ${mission.xp} XP</span><span>💰 R$ ${mission.money}</span></div><div class="mission-due">📅 Vence: ${mission.dueDate}</div><div class="mission-actions">${!mission.completed ? `<button class="btn-complete" onclick="completeMission(${mission.id})">✔ Concluir</button>` : ''}<button class="btn-edit" onclick="editMission(${mission.id})">✏️ Editar</button><button class="btn-delete" onclick="deleteMission(${mission.id})">🗑️</button></div></div>`).join("");
+        }
+
+        function renderStatisticsPage() {
+            const total = player.totalMissionsCompleted + historicalRecords.length;
+            const rate = total > 0 ? Math.round((player.totalMissionsCompleted / total) * 100) : 0;
+            document.getElementById("totalMissionsStat").innerText = total;
+            document.getElementById("completedMissionsStat").innerText = player.totalMissionsCompleted;
+            document.getElementById("failedMissionsStat").innerText = historicalRecords.length;
+            document.getElementById("completionRateStat").innerText = `${rate}%`;
+            document.getElementById("totalXPStat").innerText = player.totalXPEarned;
+            document.getElementById("totalMoneyStat").innerHTML = `R$ ${player.financialReleased.toFixed(2)}`;
+        }
+
+        function renderBadges() {
+            const badgesMap = { firstBlood: "🏅 Primeira vitória", xp200: "⭐ 200 XP", streak3: "🔥 Streak 3d", streak7: "⚡ Streak 7d", missions5: "🎯 5 missões", financialHero: "💰 Herói Financeiro" };
+            const container = document.getElementById("badgesList");
+            container.innerHTML = "";
+            Object.keys(badgesMap).forEach(key => { const badge = document.createElement("div"); badge.className = `badge ${player.badgesUnlocked[key] ? "" : "locked"}`; badge.innerText = badgesMap[key] + (player.badgesUnlocked[key] ? " ✓" : " 🔒"); container.appendChild(badge); });
+        }
+
+        function checkBadges() {
+            let updated = false;
+            if(!player.badgesUnlocked.firstBlood && player.totalMissionsCompleted >= 1) { player.badgesUnlocked.firstBlood = true; addCoins(20); showToast("🏅 Primeira vitória!"); updated=true; }
+            if(!player.badgesUnlocked.xp200 && player.totalXPEarned >= 200) { player.badgesUnlocked.xp200 = true; addCoins(30); showToast("⭐ 200 XP!"); updated=true; }
+            if(!player.badgesUnlocked.streak3 && player.streak >= 3) { player.badgesUnlocked.streak3 = true; addCoins(50); showToast("🔥 Streak 3 dias!"); updated=true; }
+            if(!player.badgesUnlocked.streak7 && player.streak >= 7) { player.badgesUnlocked.streak7 = true; addCoins(100); showToast("⚡ Streak 7 dias!"); updated=true; }
+            if(!player.badgesUnlocked.missions5 && player.totalMissionsCompleted >= 5) { player.badgesUnlocked.missions5 = true; addCoins(75); showToast("🎯 5 missões!"); updated=true; }
+            if(updated) saveGame();
+        }
+
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+        
+        let toastTimeout;
+        function showToast(msg) { 
+            const toast = document.getElementById("toastMessage"); 
+            toast.innerText = msg; 
+            toast.style.opacity = "1"; 
+            if(toastTimeout) clearTimeout(toastTimeout); 
+            toastTimeout = setTimeout(() => toast.style.opacity = "0", 2000); 
+        }
+        
+        function changeDate(delta) { 
+            currentViewDate.setDate(currentViewDate.getDate() + delta); 
+            renderDailyMissions(); 
+        }
+        
+        function goToday() { 
+            currentViewDate = new Date(); 
+            renderDailyMissions(); 
+            showToast("📅 Voltei para hoje!");
+        }
+        
+        function changeHistoryDate(delta) { 
+            historyViewDate.setDate(historyViewDate.getDate() + delta); 
+            renderHistoryMissions(); 
+        }
+        
+        function resetAllData() { if(confirm("⚠️ Apagar tudo?")) { localStorage.removeItem("rotaHeroV6"); initDefault(); loadData(); showToast("Dados resetados!"); } }
+        function saveGoal() { const newGoal = parseFloat(document.getElementById("goalValueInput").value); if(!isNaN(newGoal) && newGoal > 0) { player.financialGoal = newGoal; saveGame(); renderFinancial(); showToast(`Meta: R$ ${newGoal}`); } else showToast("Valor inválido!"); }
+
+        // Menu
+        function openMenu() { document.getElementById("sideMenu").classList.add("open"); document.getElementById("menuOverlay").classList.add("active"); }
+        function closeMenu() { document.getElementById("sideMenu").classList.remove("open"); document.getElementById("menuOverlay").classList.remove("active"); }
+        
+        function switchScreen(screenId) {
+            document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+            document.getElementById(`screen-${screenId}`).classList.add("active");
+            if(screenId === "missions") renderAllMissions();
+            if(screenId === "history") renderHistoryMissions();
+            if(screenId === "stats") renderStatisticsPage();
+            if(screenId === "home") {
+                currentViewDate = new Date();
+                renderDailyMissions();
+            }
+            closeMenu();
+        }
+
+        // Eventos
+        document.getElementById("hamburgerBtn")?.addEventListener("click", openMenu);
+        document.getElementById("menuOverlay")?.addEventListener("click", closeMenu);
+        
+        // Adicionar evento para cada item do menu
+        document.querySelectorAll(".menu-item").forEach(item => { 
+            item.addEventListener("click", () => {
+                const screenId = item.dataset.screen;
+                if(screenId === "home") {
+                    currentViewDate = new Date();
+                    renderDailyMissions();
+                }
+                switchScreen(screenId);
+            }); 
+        });
+        
+        document.getElementById("prevDayBtn")?.addEventListener("click", () => changeDate(-1));
+        document.getElementById("nextDayBtn")?.addEventListener("click", () => changeDate(1));
+        document.getElementById("historyPrevBtn")?.addEventListener("click", () => changeHistoryDate(-1));
+        document.getElementById("historyNextBtn")?.addEventListener("click", () => changeHistoryDate(1));
+        document.getElementById("createMissionBtn")?.addEventListener("click", createMission);
+        document.getElementById("saveGoalBtn")?.addEventListener("click", saveGoal);
+        document.getElementById("resetAllDataBtn")?.addEventListener("click", resetAllData);
+        
+        loadData();
+        setInterval(() => { checkAndRegisterFailedMissions(); renderAll(); }, 60000);
+    </script>
+</body>
+</html>
